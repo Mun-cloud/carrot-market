@@ -4,8 +4,10 @@ import Image from "next/image";
 const Home: NextPage = () => {
   return (
     <div className="bg-slate-400 py-20 px-20 grid gap-10 min-h-screen">
-      <div className="bg-white p-6 rounded-3xl shadow-xl">
-        <span className="font-semibold text-3xl">Select Item</span>
+      <div className="bg-white p-6 rounded-3xl shadow-xl dark:bg-black">
+        <span className="font-semibold text-3xl dark:text-white">
+          Select Item
+        </span>
         <ul>
           {[1, 2, 3, 4, 5].map((v) => (
             <div
