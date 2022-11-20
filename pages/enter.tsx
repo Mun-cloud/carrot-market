@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 export default function Enter() {
+  // 타입지정 형식 확인
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => setMethod("email");
   const onPhoneClick = () => setMethod("phone");
