@@ -56,7 +56,7 @@ export default function ItemDetail() {
             <div key={i}>
               <div className="h-56 w-full mb-4 bg-slate-300" />
               <h3 className="text-gray-700 -mb-1">Galaxy S60</h3>
-              <span className="text-sm font-medium text-gray-800">$6</span>
+              <span className="text-sm font-medium text-gray-900">$6</span>
             </div>
           ))}
         </div>
