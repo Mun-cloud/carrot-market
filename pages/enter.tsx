@@ -1,14 +1,11 @@
 import { useState } from "react";
+import { cls } from "../libs/utils";
 
 export default function Enter() {
   // 타입지정 형식 확인
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => setMethod("email");
   const onPhoneClick = () => setMethod("phone");
-
-  const cls = (...classNames: string[]) => {
-    return classNames.join(" ");
-  };
 
   return (
     <div className="mt-16 px-4">
