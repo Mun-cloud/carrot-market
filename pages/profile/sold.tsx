@@ -6,7 +6,7 @@ const Sold: NextPage = () => {
   return (
     <Layout title="판매내역" canGoBack>
       <div className="flex flex-col space-y-5 pb-10  divide-y">
-        {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
+        {[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1].map((_, i) => (
           <Item
             id={i}
             key={i}
