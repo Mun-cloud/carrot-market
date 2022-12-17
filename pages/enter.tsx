@@ -19,7 +19,7 @@ const Enter: NextPage = () => {
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => {
     reset();
-    setMethod("email");
+    setMethod("emil");
   };
   const onPhoneClick = () => {
     reset();
