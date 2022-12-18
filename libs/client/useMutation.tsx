@@ -8,20 +8,22 @@ interface UseMutationState {
 type UseMutationResult = [(data: any) => void, UseMutationState];
 
 export default function useMutation(url: string): UseMutationResult {
-  const [state, setSate] = useState<UseMutationState>({
-    loading: false,
-    data: undefined,
-    error: undefined,
-  });
-  // const [data, setData] = useState<undefined | any>(undefined);
-  // const [error, setError] = useState<undefined | any>(undefined);
-  const toggle = (item: "loading" | "data" | "error", state: boolean | any) => {
-    setSate((prev) => {
-      return { ...prev, [item]: state };
-    });
-  };
+  // const [state, setSate] = useState<UseMutationState>({
+  //   loading: false,
+  //   data: undefined,
+  //   error: undefined,
+  // });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [data, setData] = useState<undefined | any>(undefined);
+  const [error, setError] = useState<undefined | any>(undefined);
+  // const toggle = (item: "loading" | "data" | "error", state: boolean | any) => {
+  //   setSate((prev) => {
+  //     return { ...prev, [item]: state };
+  //   });
+  // };
   function mutation(data: any) {
-    toggle("loading", true);
+    // toggle("loading", true);
+    setLoading(true);
     fetch(url, {
       method: "POST",
       headers: {
@@ -33,10 +35,13 @@ export default function useMutation(url: string): UseMutationResult {
         response
           .json()
           .catch(() => {})
-          .then((data) => toggle("data", data))
+          // (data) => toggle("data", data)
+          .then(setData)
       )
-      .catch((error) => toggle("error", error))
-      .finally(() => toggle("loading", false));
+      // (error) => toggle("error", error)
+      .catch(setError)
+      // toggle("loading", false)
+      .finally(() => setLoading(false));
   }
-  return [mutation, { state.loading, state.data, state.error }];
+  return [mutation, { loading, data, error }];
 }
