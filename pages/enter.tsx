@@ -19,14 +19,14 @@ const Enter: NextPage = () => {
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => {
     reset();
-    setMethod("emil");
+    setMethod("email");
   };
   const onPhoneClick = () => {
     reset();
     setMethod("phone");
   };
-  const onValid = (data: EnterForm) => {
-    enter(data);
+  const onValid = (validForm: EnterForm) => {
+    enter(validForm);
   };
   return (
     <div className="mt-16 px-4">
