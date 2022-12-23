@@ -9,16 +9,22 @@ interface EnterForm {
   email?: string;
   phone?: string;
 }
+interface TokenForm {
+  token: string;
+}
 
-interface EnterMutationResult {
+interface MutationResult {
   ok: boolean;
 }
 
 const Enter: NextPage = () => {
   const [enter, { loading, data, error }] =
-    useMutation<EnterMutationResult>("/api/user/enter");
-  const [submitting, setSubmitting] = useState(false);
+    useMutation<MutationResult>("/api/user/enter");
+  const [confirmToken, { loading: tokenLoading, data: tokenData }] =
+    useMutation<MutationResult>("/api/user/confirm");
   const { register, reset, handleSubmit } = useForm<EnterForm>();
+  const { register: tokenResiter, handleSubmit: tokenHandleSubmit } =
+    useForm<TokenForm>();
   // 타입지정 형식 확인
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => {
@@ -31,6 +37,10 @@ const Enter: NextPage = () => {
   };
   const onValid = (validForm: EnterForm) => {
     enter(validForm);
+  };
+  const onTokenValid = (validForm: TokenForm) => {
+    if (tokenLoading) return;
+    confirmToken(validForm);
   };
   console.log(data);
   return (
@@ -64,7 +74,7 @@ const Enter: NextPage = () => {
             </button>
           </div>
         </div>
-        {!data?.ok && (
+        {!data?.ok ? (
           <form
             className="flex flex-col mt-8 space-y-4"
             onSubmit={handleSubmit(onValid)}
@@ -90,8 +100,24 @@ const Enter: NextPage = () => {
             ) : null}
             {method === "email" ? <Button text={"Get login link"} /> : null}
             {method === "phone" ? (
-              <Button text={loading ? "Loading" : "Get one-time password"} />
+              <Button
+                text={tokenLoading ? "Loading" : "Get one-time password"}
+              />
             ) : null}
+          </form>
+        ) : (
+          <form
+            className="flex flex-col mt-8 space-y-4"
+            onSubmit={tokenHandleSubmit(onTokenValid)}
+          >
+            <Input
+              register={tokenResiter("token")}
+              name="token"
+              label="Confirmation Token"
+              type="number"
+              required
+            />
+            <Button text={loading ? "Loading" : "Confirm Token"} />
           </form>
         )}
 
