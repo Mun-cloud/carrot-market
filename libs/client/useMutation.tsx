@@ -1,29 +1,22 @@
 import { useState } from "react";
 
-interface UseMutationState {
+interface UseMutationState<T> {
   loading: boolean;
-  data: undefined | any;
+  data?: T;
   error: undefined | any;
 }
-type UseMutationResult = [(data: any) => void, UseMutationState];
+type UseMutationResult<T> = [(data: any) => void, UseMutationState<T>];
 
-export default function useMutation(url: string): UseMutationResult {
-  // const [state, setSate] = useState<UseMutationState>({
-  //   loading: false,
-  //   data: undefined,
-  //   error: undefined,
-  // });
-  const [loading, setLoading] = useState<boolean>(false);
-  const [data, setData] = useState<undefined | any>(undefined);
-  const [error, setError] = useState<undefined | any>(undefined);
-  // const toggle = (item: "loading" | "data" | "error", state: boolean | any) => {
-  //   setSate((prev) => {
-  //     return { ...prev, [item]: state };
-  //   });
-  // };
+export default function useMutation<T = any>(
+  url: string
+): UseMutationResult<T> {
+  const [state, setSate] = useState<UseMutationState<T>>({
+    loading: false,
+    data: undefined,
+    error: undefined,
+  });
   function mutation(data: any) {
-    // toggle("loading", true);
-    setLoading(true);
+    setSate((prev) => ({ ...prev, loading: true }));
     fetch(url, {
       method: "POST",
       headers: {
@@ -31,17 +24,10 @@ export default function useMutation(url: string): UseMutationResult {
       },
       body: JSON.stringify(data),
     })
-      .then((response) =>
-        response
-          .json()
-          .catch(() => {})
-          // (data) => toggle("data", data)
-          .then(setData)
-      )
-      // (error) => toggle("error", error)
-      .catch(setError)
-      // toggle("loading", false)
-      .finally(() => setLoading(false));
+      .then((response) => response.json().catch(() => {}))
+      .then((data) => setSate((prev) => ({ ...prev, data })))
+      .catch((error) => setSate((prev) => ({ ...prev.error })))
+      .finally(() => setSate((prev) => ({ ...prev, loading: false })));
   }
-  return [mutation, { loading, data, error }];
+  return [mutation, { ...state }];
 }

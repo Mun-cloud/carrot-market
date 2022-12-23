@@ -2,6 +2,9 @@ import client from "@libs/server/client";
 import withHandler, { ResponseType } from "@libs/server/withHandler";
 import { NextApiRequest, NextApiResponse } from "next";
 import twilio from "twilio";
+import mail from "@sendgrid/mail";
+
+mail.setApiKey(process.env.SENDGRID_API_KEY!);
 
 const twilioClient = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
 
@@ -52,12 +55,21 @@ async function handler(
     },
   });
   if (phone) {
-    const message = await twilioClient.messages.create({
-      messagingServiceSid: process.env.TWILIO_MSID,
-      to: process.env.MY_PHONE!,
-      body: `your login token is ${payload}.!`,
-    });
-    console.log(message);
+    // const message = await twilioClient.messages.create({
+    //   messagingServiceSid: process.env.TWILIO_MSID,
+    //   to: process.env.MY_PHONE!,
+    //   body: `your login token is ${payload}.!`,
+    // });
+    // console.log(message);
+  } else if (email) {
+    // const email = await mail.send({
+    //   from: "mun05170@naver.com", // 인증했던 이메일 주소
+    //   to: "mun05170@naver.com",
+    //   subject: "캐럿마켓 인증 메일",
+    //   text: `토큰 번호는 ${payload} 입니다.`,
+    //   html: `<strong>토큰 번호는 ${payload} 입니다.</strong>`,
+    // });
+    // console.log(email);
   }
   return res.json({ ok: true });
 }
