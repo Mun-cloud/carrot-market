@@ -26,7 +26,7 @@ export default function useMutation<T = any>(
     })
       .then((response) => response.json().catch(() => {}))
       .then((data) => setSate((prev) => ({ ...prev, data })))
-      .catch((error) => setSate((prev) => ({ ...prev.error })))
+      .catch((error) => setSate((prev) => ({ ...prev, error })))
       .finally(() => setSate((prev) => ({ ...prev, loading: false })));
   }
   return [mutation, { ...state }];
