@@ -11,7 +11,7 @@ async function handler(
     body: { name, price, description },
     session: { user },
   } = req;
-  const pruduct = await client.product.create({
+  const product = await client.product.create({
     data: {
       name,
       price,
@@ -20,7 +20,7 @@ async function handler(
       user: { connect: { id: user?.id } },
     },
   });
-  res.json({ ok: true, pruduct });
+  res.json({ ok: true, product });
 }
 
 export default withApiSession(withHandler({ method: "POST", handler }));
