@@ -1,7 +1,24 @@
 import Button from "@components/button";
 import Layout from "@components/layout";
+import { Product, User } from "@prisma/client";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import useSWR from "swr";
+
+interface ProductWithUser extends Product {
+  user: User;
+}
+
+interface ItemDetailResponse {
+  ok: boolean;
+  products: ProductWithUser;
+}
 
 export default function ItemDetail() {
+  const router = useRouter();
+  const { data } = useSWR<ItemDetailResponse>(
+    router.query.id ? `/api/products/${router.query.id}` : null
+  );
   return (
     <Layout canGoBack>
       <div className="px-4  py-4">
@@ -10,25 +27,25 @@ export default function ItemDetail() {
           <div className="flex cursor-pointer py-3 border-t border-b items-center space-x-3">
             <div className="w-12 h-12 rounded-full bg-slate-300" />
             <div>
-              <p className="text-sm font-medium text-gray-700">Steve Jebs</p>
-              <p className="text-xs font-medium text-gray-500">
-                View profile &rarr;
+              <p className="text-sm font-medium text-gray-700">
+                {data?.products?.user?.name}
               </p>
+              <Link
+                href={`/users/profiles/${data?.products?.user?.id}`}
+                className="text-xs font-medium text-gray-500"
+              >
+                View profile &rarr;
+              </Link>
             </div>
           </div>
           <div className="mt-5">
-            <h1 className="text-3xl font-bold text-gray-900">Galaxy S50</h1>
-            <span className="text-2xl block mt-3 text-gray-900">$140</span>
-            <p className=" my-6 text-gray-700">
-              My money&apos;s in that office, right? If she start giving me some
-              bullshit about it ain&apos;t there, and we got to go someplace
-              else and get it, I&apos;m gonna shoot you in the head then and
-              there. Then I&apos;m gonna shoot that bitch in the kneecaps, find
-              out where my goddamn money is. She gonna tell me too. Hey, look at
-              me when I&apos;m talking to you, motherfucker. You listen: we go
-              in there, and that ni**a Winston or anybody else is in there, you
-              the first motherfucker to get shot. You understand?
-            </p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {data?.products?.name}
+            </h1>
+            <span className="text-2xl block mt-3 text-gray-900">
+              ${data?.products?.price}
+            </span>
+            <p className=" my-6 text-gray-700">{data?.products?.description}</p>
             <div className="flex items-center justify-between space-x-2">
               <Button large text="Talk to seller" />
               <button className="p-3 rounded-md flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-500">
