@@ -26,7 +26,7 @@ export default function TextArea({
       <textarea
         id={name}
         {...register}
-        className="mt-1 shadow-sm w-full focus:ring-orange-500 rounded-md border-gray-300 focus:border-orange-500 "
+        className="mt-1 px-3 py-2 shadow-sm border w-full focus:ring-orange-500 rounded-md border-gray-300 focus:border-orange-500 "
         rows={4}
         {...rest}
       />
