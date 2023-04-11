@@ -3,9 +3,12 @@ import Layout from "@components/layout";
 import useMutation from "@libs/client/useMutation";
 import { cloudflareImg, cls } from "@libs/client/utils";
 import { Product, User } from "@prisma/client";
+import { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useSWR from "swr";
+import client from "@libs/server/client";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -18,7 +21,11 @@ interface ItemDetailResponse {
   isLiked: boolean;
 }
 
-export default function ItemDetail() {
+const ItemDetail: NextPage<ItemDetailResponse> = ({
+  products,
+  relatedProducts,
+  isLiked,
+}) => {
   const router = useRouter();
   const { data, mutate } = useSWR<ItemDetailResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
@@ -31,29 +38,40 @@ export default function ItemDetail() {
     toggleFav({});
   };
   return (
-    <Layout canGoBack title={data?.products.name}>
+    <Layout canGoBack title={products.name}>
       <div className="px-4  py-4">
         <div className="mb-8">
-          {data?.products.image ? (
-            <img src={cloudflareImg(data.products.image)} />
+          {products.image ? (
+            <div className="relative pb-96">
+              <Image
+                src={cloudflareImg(products?.image)}
+                className="bg-slate-300 object-cover"
+                alt={products.name}
+              />
+            </div>
           ) : (
             <div className="h-96 bg-slate-300" />
           )}
           <div className="flex cursor-pointer py-3 border-t border-b items-center space-x-3">
-            {data?.products.user.avatar ? (
-              <img
-                src={cloudflareImg(data.products.user.avatar, "avatar")}
+            {products.user.avatar ? (
+              <Image
+                src={
+                  products?.user.avatar
+                    ? cloudflareImg(products.user.avatar, "avatar")
+                    : ""
+                }
                 className="w-12 h-12 rounded-full bg-slate-300"
+                alt={products.user.name}
               />
             ) : (
               <div className="w-12 h-12 rounded-full bg-slate-300" />
             )}
             <div>
               <p className="text-sm font-medium text-gray-700">
-                {data?.products?.user?.name}
+                {products?.user?.name}
               </p>
               <Link
-                href={`/users/profiles/${data?.products?.user?.id}`}
+                href={`/users/profiles/${products?.user?.id}`}
                 className="text-xs font-medium text-gray-500"
               >
                 View profile &rarr;
@@ -62,24 +80,24 @@ export default function ItemDetail() {
           </div>
           <div className="mt-5">
             <h1 className="text-3xl font-bold text-gray-900">
-              {data?.products?.name}
+              {products?.name}
             </h1>
             <span className="text-2xl block mt-3 text-gray-900">
-              ${data?.products?.price}
+              ${products?.price}
             </span>
-            <p className=" my-6 text-gray-700">{data?.products?.description}</p>
+            <p className=" my-6 text-gray-700">{products?.description}</p>
             <div className="flex items-center justify-between space-x-2">
               <Button large text="Talk to seller" />
               <button
                 onClick={onFavclick}
                 className={cls(
                   "p-3 rounded-md flex items-center justify-center hover:bg-gray-100",
-                  data?.isLiked
+                  isLiked
                     ? "text-red-400 hover:text-red-500"
                     : "text-gray-400 hover:text-gray-500"
                 )}
               >
-                {data?.isLiked ? (
+                {isLiked ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-6 w-6"
@@ -116,7 +134,7 @@ export default function ItemDetail() {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Similar items</h2>
           <div className=" mt-6 grid grid-cols-2 gap-4">
-            {data?.relatedProducts.map((product) => (
+            {relatedProducts.map((product) => (
               <div key={product.id}>
                 <div className="h-56 w-full mb-4 bg-slate-300" />
                 <h3 className="text-gray-700 -mb-1">{product.name}</h3>
@@ -130,4 +148,60 @@ export default function ItemDetail() {
       </div>
     </Layout>
   );
-}
+};
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+
+export const getStaticProps: GetStaticProps = async (ctx) => {
+  if (!ctx?.params?.id) {
+    return {
+      props: {},
+    };
+  }
+  const product = await client.product.findUnique({
+    where: {
+      id: Number(ctx.params.id),
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          avatar: true,
+        },
+      },
+    },
+  });
+  const terms = product?.name.split(" ").map((word) => ({
+    name: {
+      contains: word,
+    },
+  }));
+  const relatedProducts = await client.product.findMany({
+    where: {
+      OR: terms,
+      AND: {
+        id: {
+          not: product?.id,
+        },
+      },
+    },
+  });
+  const isLiked = false;
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+
+  return {
+    props: {
+      product: JSON.parse(JSON.stringify(product)),
+      relatedProducts: JSON.parse(JSON.stringify(relatedProducts)),
+      isLiked,
+    },
+  };
+};
+
+export default ItemDetail;

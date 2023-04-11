@@ -7,3 +7,11 @@ category: thougths
 #My First Post
 
 Hello Everyone
+
+- 하나
+- 둘
+- 셋
+
+1. 일
+2. 이
+3. 삼
