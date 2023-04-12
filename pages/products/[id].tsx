@@ -16,13 +16,13 @@ interface ProductWithUser extends Product {
 
 interface ItemDetailResponse {
   ok: boolean;
-  products: ProductWithUser;
+  product: ProductWithUser;
   relatedProducts: Product[];
   isLiked: boolean;
 }
 
 const ItemDetail: NextPage<ItemDetailResponse> = ({
-  products,
+  product,
   relatedProducts,
   isLiked,
 }) => {
@@ -30,7 +30,7 @@ const ItemDetail: NextPage<ItemDetailResponse> = ({
   const { data, mutate } = useSWR<ItemDetailResponse>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
-  console.log(data);
+  console.log(product);
   const [toggleFav] = useMutation(`/api/products/${router.query.id}/fav`);
   const onFavclick = () => {
     if (!data) return;
@@ -38,40 +38,42 @@ const ItemDetail: NextPage<ItemDetailResponse> = ({
     toggleFav({});
   };
   return (
-    <Layout canGoBack title={products.name}>
+    <Layout canGoBack title={product.name}>
       <div className="px-4  py-4">
         <div className="mb-8">
-          {products.image ? (
-            <div className="relative pb-96">
+          {product.image ? (
+            <div className="relative pb-96 overflow-hidden">
               <Image
-                src={cloudflareImg(products?.image)}
+                src={cloudflareImg(product.image)}
                 className="bg-slate-300 object-cover"
-                alt={products.name}
+                fill={true}
+                alt={product.name}
               />
             </div>
           ) : (
             <div className="h-96 bg-slate-300" />
           )}
           <div className="flex cursor-pointer py-3 border-t border-b items-center space-x-3">
-            {products.user.avatar ? (
-              <Image
-                src={
-                  products?.user.avatar
-                    ? cloudflareImg(products.user.avatar, "avatar")
-                    : ""
-                }
-                className="w-12 h-12 rounded-full bg-slate-300"
-                alt={products.user.name}
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-slate-300" />
-            )}
+            <div className="w-12 h-12 rounded-full bg-slate-300 relative overflow-hidden">
+              {product.user.avatar && (
+                <Image
+                  src={
+                    product?.user.avatar
+                      ? cloudflareImg(product.user.avatar, "avatar")
+                      : ""
+                  }
+                  className="object-cover"
+                  fill={true}
+                  alt={product.user.name}
+                />
+              )}
+            </div>
             <div>
               <p className="text-sm font-medium text-gray-700">
-                {products?.user?.name}
+                {product?.user?.name}
               </p>
               <Link
-                href={`/users/profiles/${products?.user?.id}`}
+                href={`/users/profiles/${product?.user?.id}`}
                 className="text-xs font-medium text-gray-500"
               >
                 View profile &rarr;
@@ -80,12 +82,12 @@ const ItemDetail: NextPage<ItemDetailResponse> = ({
           </div>
           <div className="mt-5">
             <h1 className="text-3xl font-bold text-gray-900">
-              {products?.name}
+              {product?.name}
             </h1>
             <span className="text-2xl block mt-3 text-gray-900">
-              ${products?.price}
+              ${product?.price}
             </span>
-            <p className=" my-6 text-gray-700">{products?.description}</p>
+            <p className=" my-6 text-gray-700">{product?.description}</p>
             <div className="flex items-center justify-between space-x-2">
               <Button large text="Talk to seller" />
               <button
@@ -136,7 +138,16 @@ const ItemDetail: NextPage<ItemDetailResponse> = ({
           <div className=" mt-6 grid grid-cols-2 gap-4">
             {relatedProducts.map((product) => (
               <div key={product.id}>
-                <div className="h-56 w-full mb-4 bg-slate-300" />
+                <div className="h-56 w-full mb-4 bg-slate-300 relative">
+                  {product.image && (
+                    <Image
+                      src={cloudflareImg(product.image)}
+                      alt={product.name}
+                      fill={true}
+                      className="object-cover"
+                    />
+                  )}
+                </div>
                 <h3 className="text-gray-700 -mb-1">{product.name}</h3>
                 <span className="text-sm font-medium text-gray-900">
                   ${product.price}
@@ -193,7 +204,6 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
     },
   });
   const isLiked = false;
-  await new Promise((resolve) => setTimeout(resolve, 10000));
 
   return {
     props: {

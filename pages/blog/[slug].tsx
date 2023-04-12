@@ -23,8 +23,8 @@ export function getStaticPaths() {
     return { params: { slug: name } };
   });
   return {
-    paths: files,
-    fallback: false,
+    paths: [],
+    fallback: "blocking",
   };
 }
 
